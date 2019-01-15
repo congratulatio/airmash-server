@@ -11,6 +11,7 @@ use consts::timer::DELETE_ENTITY;
 use dispatch::SystemInfo;
 
 use protocol::server::MobDespawn;
+use protocol::DespawnType;
 
 pub struct MissileCull;
 
@@ -19,7 +20,6 @@ pub struct MissileCullData<'a> {
 	ents: Entities<'a>,
 	missile_trajectory: ReadStorage<'a, MissileTrajectory>,
 	pos: ReadStorage<'a, Position>,
-	mob: ReadStorage<'a, Mob>,
 	conns: Read<'a, Connections>,
 	lazy: Read<'a, LazyUpdate>,
 	dispatch: ReadExpect<'a, FutureDispatcher>,
@@ -35,18 +35,18 @@ impl<'a> System<'a> for MissileCull {
 		let ref dispatch = data.dispatch;
 		let ref conns = data.conns;
 
-		(&*data.ents, &data.mob, &data.pos, &data.missile_trajectory)
+		(&*data.ents, &data.pos, &data.missile_trajectory)
 			.join()
-			.filter_map(|(ent, mob, pos, missile_trajectory)| {
+			.filter_map(|(ent, pos, missile_trajectory)| {
 				let distance_traveled = (*pos - missile_trajectory.0).length();
 				let end_distance = missile_trajectory.1;
 				if distance_traveled > end_distance {
-					Some((ent, *mob, *pos))
+					Some((ent, *pos))
 				} else {
 					None
 				}
 			})
-			.for_each(|(ent, mob, pos)| {
+			.for_each(|(ent, pos)| {
 				// Remove a bunch of components that are used to
 				// recognize missiles lazily (they will get
 				// removed at the end of the frame)
@@ -65,7 +65,7 @@ impl<'a> System<'a> for MissileCull {
 
 				let packet = MobDespawn {
 					id: ent.into(),
-					ty: mob,
+					ty: DespawnType::LifetimeEnded,
 				};
 
 				conns.send_to_all(packet);
