@@ -36,7 +36,7 @@ within the `base` folder.
 Note that rust nightly is required. Current `master` builds using:
 
 ```
-rustc 1.37.0-nightly (400b409ef 2019-06-09)
+rustc 1.38.0-nightly (311376d30 2019-07-18)
 ```
 
 
