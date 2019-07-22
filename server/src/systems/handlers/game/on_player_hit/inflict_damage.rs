@@ -75,13 +75,19 @@ impl<'a> EventHandler<'a> for InflictDamage {
 			/ upgconf.defense.factor[upgrades.defense as usize];
 		*health -= damage;
 
-		info!("{:?} {} {:?} using {:?} damage, health now {:?} {:?}",
-			  owner.0,
-			  (if health.inner() <= 0.0 { "killed" } else { "injured" }),
-			  evt.player,
-			  damage.inner(),
-			  health.inner(),
-			  *pos);
+		info!(
+			"{:?} {} {:?} using {:?} damage, health now {:?} {:?}",
+			owner.0,
+			(if health.inner() <= 0.0 {
+				"killed"
+			} else {
+				"injured"
+			}),
+			evt.player,
+			damage.inner(),
+			health.inner(),
+			*pos
+		);
 
 		if health.inner() <= 0.0 {
 			data.is_dead.insert(evt.player, IsDead).unwrap();
